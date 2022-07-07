@@ -14,7 +14,7 @@ app.get('*', (req, res) => {
 })
 
 const port = process.env.PORT || 5000
-const server = http.createServer(express)
+const server = http.createServer(app)
 const wss = new WebSocketServer({
   server: server
 })
