@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react'
-import { io } from 'socket.io-client'
 import './index.scss'
 
-const socket = io()
+const client = new WebSocket('ws://localhost:5000')
 
 const Game = () => {
   const [tick, setTick] = useState(0)
 
   useEffect(() => {
-    socket.on('tick', (tickNum) => {
-      setTick(tickNum)
-    })
-    
-    return () => {
-      socket.off('tick')
+    client.onopen = () => {
+      console.log('server connected')
+    }
+
+    client.onmessage = (e) => {
+      setTick(e.data)
     }
   }, [])
 

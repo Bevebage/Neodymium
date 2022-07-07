@@ -1,20 +1,11 @@
 const express = require('express')
-const path = require('path')
 const http = require('http')
+const path = require('path')
 const cors = require('cors')
-const { Server } = require('socket.io')
+const { WebSocketServer } = require('ws')
 
 const app = express()
 app.use(cors())
-
-const server = http.createServer(app)
-const io = new Server(server, {
-  cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  }
-})
-let port = process.env.PORT || 5000
 
 app.use(express.static(path.join(__dirname, 'client/build')))
 
@@ -22,16 +13,28 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname+'/client/build/index.html'))
 })
 
+const port = process.env.PORT || 5000
+const server = http.createServer(express)
+const wss = new WebSocketServer({
+  server: server
+})
+
 let tick = 0 
 
-io.on('connect', (socket) => {
-  console.log(`user connected: ${socket.id}`)
+wss.broadcast = (data) => {
+  wss.clients.forEach((client) => {
+    client.send(data)
+  })
+}
+
+wss.on('connection', (ws) => {
+  console.log(`user connected ${tick}`)
 })
 
 setInterval(() => {
-  io.emit('tick', tick)
+  wss.broadcast(tick)
   tick += 1
-}, 1000/60)
+}, 10)
 
 server.listen(port, () => {
   console.log(`server listening on port: ${port}`)
