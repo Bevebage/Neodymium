@@ -14,13 +14,16 @@ const io = new Server(server, {
   }
 })
 
+let tick = 0 
+
 io.on('connect', (socket) => {
   console.log(`user connected: ${socket.id}`)
-
-  socket.on('click', (data) => {
-     
-  })
 })
+
+setInterval(() => {
+  io.sockets.emit('tick', tick)
+  tick += 1
+}, 1000/60)
 
 server.listen(3001, () => {
   console.log(`server listening on port: ${3001}`)

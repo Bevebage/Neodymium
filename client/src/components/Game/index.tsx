@@ -1,25 +1,25 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { io } from 'socket.io-client'
 import './index.scss'
 
-const socket = io('http://localhost:3001')
+const socket = io('localhost:3001')
 
 const Game = () => {
-  const sendClick = () => {
-    socket.emit('click', {
-      element: 'test'
-    })
-  }
+  const [tick, setTick] = useState(0)
 
   useEffect(() => {
-    socket.on('tick', () => {
-      console.log('tick')
+    socket.on('tick', (tickNum) => {
+      setTick(tickNum)
     })
-  }, [socket])
+    
+    return () => {
+      socket.off('tick')
+    }
+  }, [])
 
   return (
     <div className='Game'>
-      <p>Game </p>
+      <p>Tick: {tick}</p>
     </div>
   )
 }
