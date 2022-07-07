@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { io } from 'socket.io-client'
 import './index.scss'
 
-const socket = io('localhost:5000')
+const socket = io()
 
 const Game = () => {
   const [tick, setTick] = useState(0)

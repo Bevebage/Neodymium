@@ -29,7 +29,7 @@ io.on('connect', (socket) => {
 })
 
 setInterval(() => {
-  io.sockets.emit('tick', tick)
+  io.emit('tick', tick)
   tick += 1
 }, 1000/60)
 
