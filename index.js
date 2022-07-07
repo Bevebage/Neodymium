@@ -1,4 +1,5 @@
 const express = require('express')
+const path = require('path')
 const http = require('http')
 const cors = require('cors')
 const { Server } = require('socket.io')
@@ -13,6 +14,13 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
   }
 })
+let port = process.env.PORT || 5000
+
+app.use(express.static(path.join(__dirname, 'client/build')))
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname+'/client/build/index.html'))
+})
 
 let tick = 0 
 
@@ -25,6 +33,6 @@ setInterval(() => {
   tick += 1
 }, 1000/60)
 
-server.listen(3001, () => {
-  console.log(`server listening on port: ${3001}`)
+server.listen(port, () => {
+  console.log(`server listening on port: ${port}`)
 })
