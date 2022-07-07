@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import './index.scss'
 
-const client = new WebSocket('ws://localhost:5000')
+const HOST = window.location.origin.replace(/^http/, 'ws')
+console.log(HOST)
+const client = new WebSocket(HOST)
 
 const Game = () => {
   const [tick, setTick] = useState(0)
