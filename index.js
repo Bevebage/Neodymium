@@ -1,16 +1,21 @@
-const express = require('express')
-const http = require('http')
-const path = require('path')
-const cors = require('cors')
-const { WebSocketServer } = require('ws')
+import express from 'express'
+import http from 'http'
+import cors from 'cors'
+import { WebSocketServer } from 'ws'
+
+import { Low, JSONFile } from 'lowdb'
+import { fileURLToPath } from 'url'
+import { join, dirname } from 'path'
 
 const app = express()
 app.use(cors())
 
-app.use(express.static(path.join(__dirname, 'client/build')))
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+app.use(express.static(join(__dirname, 'client/build')))
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname+'/client/build/index.html'))
+  res.sendFile(join(__dirname, 'client/build/index.html'))
 })
 
 const port = process.env.PORT || 3000
@@ -19,7 +24,13 @@ const wss = new WebSocketServer({
   server: server
 })
 
-let tick = 0 
+const dataFile = join(__dirname, 'data.json')
+const adapter = new JSONFile(dataFile)
+const db = new Low(adapter)
+
+await db.read()
+
+db.data ||= { tick: 0 }
 
 wss.broadcast = (data) => {
   wss.clients.forEach((client) => {
@@ -28,13 +39,17 @@ wss.broadcast = (data) => {
 }
 
 wss.on('connection', (ws) => {
-  console.log(`user connected ${tick}`)
+  console.log(`user connected ${db.data.tick}`)
 })
 
 setInterval(() => {
-  wss.broadcast(tick)
-  tick += 1
-}, 10)
+  wss.broadcast(db.data.tick)
+  db.data.tick += 1
+}, 1)
+
+setInterval(() => {
+  db.write()
+}, 300000)
 
 server.listen(port, () => {
   console.log(`server listening on port: ${port}`)
